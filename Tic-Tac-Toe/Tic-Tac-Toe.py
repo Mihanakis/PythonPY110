@@ -24,8 +24,15 @@ def invert_symbol(enter_val):   # функция для замены 'X' на 1 
             exit_val[index] = -1
     return exit_val
 
+def drow_exam(check_draw):  # функция проверки на ничью
+    for val in check_draw:
+        if val == "_":
+            return
+    return sys.exit("Никто не победил! Ничья!")
+
 def check_step(check_val):  # проверка рядов, столбцов и диагоналей на наличие победы
     vision(check_val)
+    drow_exam(check_val)
     invert_matrix = invert_symbol(check_val)
 
     sum_1line = sum(invert_matrix[0:3])
