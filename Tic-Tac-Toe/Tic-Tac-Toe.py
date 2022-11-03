@@ -1,24 +1,24 @@
 import sys
 
-size = 3    # принимаем поле равное 3x3
+def enter_size(): # функция проверки ввода размера матрицы на наличие ошибок
+    error_size = "Выберите значение для размера поля от 3 до 10:"  # напоминание пользователю о вводе параметров ряда
+    print(""""Игра Крестики-Нолики".\nРазмер ряда для победы будет равен размеру поля.""", error_size)
+    while True:
+        size = [int(number) for number in input().split() if number.isdigit()]
+        if size:                            # проверка на пустое поле
+            if len(size) > 1:               # проверка на ввод больше одного значения
+                print("\033[31mОшибка: 'Введено больше одного значения'.\033[0m", error_size)
+                continue
+            size = size[0]
+            if size in range(3, 11):        # проверка на соответсвие условиям
+                return size
+        print("\033[31mОшибка: 'Введено некорректное значение'.\033[0m", error_size)
 
-eximple = list(range(1, (size**2)+1))    # последовательность чисел для справки пользователю
-
-print("""Игра "Крестики-Нолики". Правила: Игроки по очереди ставят на свободные клетки поля 3×3 знаки
- (один всегда крестики, другой всегда нолики). Первый, выстроивший в ряд 3 своих фигуры по вертикали, 
- горизонтали или диагонали, выигрывает. Первый ход делает игрок, ставящий крестики. Начинаем.""")
-
-def vision(square, size=3):     # функция для вывода квадратных матриц
+def vision(square, size):     # функция для вывода квадратных матриц
     for row in range(size):
         print(square[(row * size):(size * (row + 1))])
 
-vision(eximple)     # отображаю пример для понимания как предстоит выбирать ячейки
-
-matrix = ["_"] * size**2     # вычисления буду производить в виде ряда
-
-error_str = f"Введите значение свободной ячейки от 1 до {size**2}:"
-
-def turn_in_field(line, size=3):    # функция превращения списка в матрицу
+def turn_in_field(line, size):    # функция превращения списка в матрицу
     field=[]
     for row in range(size):
         field.append([])
@@ -42,29 +42,22 @@ def drow_exam(check_draw):  # функция проверки на ничью
     return sys.exit("Никто не победил! Ничья!")
 
 def check_step(check_val):  # проверка рядов, столбцов и диагоналей на наличие победы или ничей
-    vision(check_val)
+    vision(check_val, size)
     drow_exam(check_val)
-    invert_matrix = invert_symbol(check_val)
-
-    sum_1line = sum(invert_matrix[0:3])
-    sum_2line = sum(invert_matrix[3:6])
-    sum_3line = sum(invert_matrix[6:9])
-
-    sum_1column = invert_matrix[0] + invert_matrix[3] + invert_matrix[6]
-    sum_2column = invert_matrix[1] + invert_matrix[4] + invert_matrix[7]
-    sum_3column = invert_matrix[2] + invert_matrix[5] + invert_matrix[8]
-
-    sum_1diag = invert_matrix[0] + invert_matrix[4] + invert_matrix[8]
-    sum_2diag = invert_matrix[2] + invert_matrix[4] + invert_matrix[6]
-
-    # переменная для которой, если одно из значений принимает значение 3 или -3 - наступает победа
-    winrate = [sum_1column, sum_2column, sum_3column, sum_1diag, sum_2diag]
+    invert_matrix = turn_in_field(invert_symbol(check_val), size)
+    sum_line = list(map(sum, invert_matrix))
+    sum_column = list(map(sum, zip(*invert_matrix)))
+    sum_diag1 = sum(invert_matrix[i][size-i-1] for i in range(size))
+    sum_diag2 = sum(invert_matrix[i][i] for i in range(size))
+    winrate = sum_line + sum_column + [sum_diag1] + [sum_diag2]     # переменная проверки на победу
     for one_of_sum in winrate:
-        if one_of_sum == 3:
+        if one_of_sum == size:
             return sys.exit("Игрок 1 победил! Победили крестики!")
-        elif one_of_sum == -3:
+        elif one_of_sum == -size:
             return sys.exit("Игрок 2 победил! Победили нолики!")
-def input_exam(): # функция проверки вводных данных на наличие ошибок
+
+def input_exam(): # функция проверки ввода позиции в матрице на наличие ошибок
+    error_str = f"Введите значение свободной ячейки от 1 до {size ** 2}:"  # строка ошибки ввода 'X' и '0'
     while True:
         step = [int(number)-1 for number in input().split() if number.isdigit()]
         if step:                            # проверка на пустое поле
@@ -72,23 +65,31 @@ def input_exam(): # функция проверки вводных данных 
                 print("\033[31mОшибка: 'Введено больше одного значения'.\033[0m", error_str)
                 continue
             step = step[0]
-            if step in range(size**2):      # проверка на позицию в матрице
+            if step in range(size ** 2):      # проверка на позицию в матрице
                 if matrix[step] == "_":     # проверка на пустую строку
                     return step
                 print("\033[31mОшибка: 'Выбранная ячейка занята'.\033[0m", error_str)
                 continue
-        print("\033[31mОшибка: 'Не выбрано число из множества'.\033[0m", error_str)
+        print("\033[31mОшибка: 'Введено некорректное значение'.\033[0m", error_str)
 
 def game():
+    global size
+    global matrix
+    size = enter_size()
+    matrix = ["_"] * size ** 2  # вычисления буду производить в виде ряда
+    print(f"""Правила: Игроки по очереди ставят на свободные клетки поля {size}x{size} знаки (один всегда крестики,
+другой всегда нолики). Первый, выстроивший в ряд {size} свои фигуры по вертикали, горизонтали
+или диагонали, выигрывает. Первый ход делает игрок, ставящий крестики. Начинаем.""")
+    eximple = list(range(1, (size ** 2) + 1))       # последовательность чисел для справки пользователю
+    vision(eximple, size)                           # отображаю пример для понимания как предстоит выбирать ячейки
     while True:
         print("Ход первого игрока. Выберите число в котором нужно поставить 'X':")
         step_X = input_exam()
         matrix[step_X] = "X"
         check_step(matrix)
-        print("Ход второго игрока. Выберете число в котором нужно поставить '0':")
+        print("Ход второго игрока. Выберите число в котором нужно поставить '0':")
         step_0 = input_exam()
         matrix[step_0] = "0"
         check_step(matrix)
 
 game()
-
