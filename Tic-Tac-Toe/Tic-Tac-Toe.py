@@ -29,7 +29,6 @@ def turn_in_field(line, size):  # функция превращения спис
             field[-1].append(number)
     return field
 
-
 def invert_symbol(enter_val):  # функция для замены 'X' на 1 и '0' на -1
     exit_val = [0] * len(enter_val)
     for index, val in enumerate(enter_val):
@@ -49,7 +48,6 @@ def draw_exam(check_draw):  # функция проверки на ничью
 
 def check_step(check_val, size):  # проверка рядов, столбцов и диагоналей на наличие победы или ничей
     vision(check_val, size)
-    draw_exam(check_val)
     invert_matrix = turn_in_field(invert_symbol(check_val), size)
     sum_line = list(map(sum, invert_matrix))
     sum_column = list(map(sum, zip(*invert_matrix)))
@@ -61,6 +59,7 @@ def check_step(check_val, size):  # проверка рядов, столбцо�
             return sys.exit("Игрок 1 победил! Победили крестики!")
         elif one_of_sum == -size:
             return sys.exit("Игрок 2 победил! Победили нолики!")
+    draw_exam(check_val)
 
 
 def input_exam(matrix, size):  # функция проверки ввода позиции в матрице на наличие ошибок
