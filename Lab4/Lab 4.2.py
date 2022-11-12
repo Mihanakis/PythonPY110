@@ -5,9 +5,7 @@ def get_unique_list_numbers() -> list[int]:
     unique_numbers = []
     while len(unique_numbers) != 15:
         step_number = randint(-10, 10)
-        if step_number in unique_numbers:
-            continue
-        else:
+        if step_number not in unique_numbers:
             unique_numbers.append(step_number)
     return unique_numbers
 
